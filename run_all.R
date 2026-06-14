@@ -36,8 +36,20 @@ get_script_dir <- function() {
 }
 script_dir   <- Sys.getenv("CP_SCRIPT_DIR")
 if (script_dir == "") script_dir <- get_script_dir()
-project_dir  <- dirname(dirname(script_dir))
-project_root <- file.path(project_dir, "CountdownParadox_Analysis")
+# project_dir holds CountdownParadox_Analysis/ and
+# CountdownParadox_Manuscript_Simulations/. Resolution precedence:
+#   1. CP_PROJECT_DIR, if set;
+#   2. the manuscript authors' grandparent layout, but only if it actually
+#      contains CountdownParadox_Analysis/;
+#   3. the repository folder itself, so a standalone clone is self-contained
+#      (the sub-folders are then created/expected directly under the repository).
+project_dir <- Sys.getenv("CP_PROJECT_DIR")
+if (project_dir == "") {
+  cand <- dirname(dirname(script_dir))
+  project_dir <- if (dir.exists(file.path(cand, "CountdownParadox_Analysis"))) cand else script_dir
+}
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") project_root <- file.path(project_dir, "CountdownParadox_Analysis")
 Sys.setenv(CP_PROJECT_DIR = project_dir, CP_PROJECT_ROOT = project_root)
 
 cat("Script directory:", script_dir, "\n\n")

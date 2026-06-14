@@ -42,27 +42,23 @@
 # alongside that (sibling directory). Resolve via relative path first, fall
 # back to the absolute path used in the manuscript authors' working copy.
 
-this_file <- tryCatch(
-  normalizePath(sys.frame(1)$ofile, mustWork = FALSE),
-  error = function(e) NULL
-)
-
-if (!is.null(this_file) && nzchar(this_file)) {
-  repro_dir <- dirname(this_file)
-  sim_dir <- normalizePath(
-    file.path(repro_dir, "..", "..", "CountdownParadox_Manuscript_Simulations"),
-    mustWork = FALSE
-  )
-} else {
-  sim_dir <- Sys.getenv("CP_SIM_DIR")
-  if (sim_dir == "") stop("Could not locate the simulations folder; set CP_SIM_DIR to <project>/CountdownParadox_Manuscript_Simulations.")
+# Locate the simulations folder. Precedence: (1) CP_SIM_DIR if set;
+# (2) the manuscript authors' sibling layout, located portably (works under
+# `Rscript` or `source()`); (3) stop with guidance (a standalone clone that
+# re-runs simulations must set CP_SIM_DIR).
+sim_dir <- Sys.getenv("CP_SIM_DIR")
+if (sim_dir == "") {
+  args <- commandArgs(trailingOnly = FALSE)
+  fa <- grep("^--file=", args, value = TRUE)
+  here <- if (length(fa)) dirname(normalizePath(sub("^--file=", "", fa[length(fa)])))
+          else if (!is.null(sys.frame(1)$ofile)) dirname(normalizePath(sys.frame(1)$ofile))
+          else normalizePath(getwd())
+  cand <- normalizePath(file.path(here, "..", "..", "CountdownParadox_Manuscript_Simulations"),
+                        mustWork = FALSE)
+  if (dir.exists(cand)) sim_dir <- cand
 }
-
-if (!dir.exists(sim_dir)) {
-  stop(sprintf(
-    "Cannot find CountdownParadox_Manuscript_Simulations/ at %s.\n  Set sim_dir manually at the top of run_simulations.R.",
-    sim_dir
-  ))
+if (sim_dir == "" || !dir.exists(sim_dir)) {
+  stop("Cannot locate the simulations folder. Set CP_SIM_DIR to the CountdownParadox_Manuscript_Simulations directory.")
 }
 
 # -- Banner + confirmation gate ----------------------------------------------
