@@ -27,8 +27,10 @@ library(dplyr)
 library(survival)
 
 # ---- Paths ---- #
-project_root <- Sys.getenv("CP_PROJECT_ROOT", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Analysis")
-biocard_dir  <- Sys.getenv("CP_BIOCARD_DIR", "/Users/daisyzhu/Documents/Research Projects/BIOCARD/BIOCARD_codes")
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
+biocard_dir  <- Sys.getenv("CP_BIOCARD_DIR")
+if (biocard_dir == "") stop("CP_BIOCARD_DIR is not set. Set it to the directory containing the raw BIOCARD data files.")
 output_dir   <- file.path(project_root, "data")
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 

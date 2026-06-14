@@ -2,8 +2,8 @@
 ## compute_manuscript_descriptives.R
 ##
 ## Stage 3b: Compute descriptive statistics for manuscript tables and figures.
-## All outputs are CSV files consumed by create_natmed_tables.R and
-## create_natmed_figures.R — no hardcoded values in downstream scripts.
+## All outputs are CSV files consumed by create_manuscript_tables.R and
+## create_manuscript_figures.R — no hardcoded values in downstream scripts.
 ##
 ## Input:
 ##   data/analysis_data_merged.rda             (BIOCARD survival + covariates)
@@ -25,7 +25,8 @@ rm(list = ls())
 library(survival)
 
 # ---- Paths ---- #
-project_root <- Sys.getenv("CP_PROJECT_ROOT", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Analysis")
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
 out_dir      <- project_root
 data_dir     <- file.path(project_root, "data")
 results_dir  <- file.path(project_root, "results")

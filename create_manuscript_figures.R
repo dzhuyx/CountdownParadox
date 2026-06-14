@@ -1,7 +1,7 @@
 # ==============================================================================
-# create_natmed_figures.R
+# create_manuscript_figures.R
 #
-# Publication-quality figures for the Nature Medicine manuscript.
+# Publication-quality figures for the manuscript.
 # Output: PDF + PNG (300 dpi).
 #
 # Main figures:
@@ -21,7 +21,8 @@ library(patchwork)
 library(scales)
 
 # -- Paths -------------------------------------------------------------------
-project_dir <- Sys.getenv("CP_PROJECT_DIR", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity")
+project_dir <- Sys.getenv("CP_PROJECT_DIR")
+if (project_dir == "") stop("CP_PROJECT_DIR is not set. Run via run_all.R, or set it to the project root.")
 analysis_dir <- file.path(project_dir, "CountdownParadox_Analysis")
 results_dir <- file.path(analysis_dir, "results")
 sim_dir <- file.path(project_dir, "CountdownParadox_Manuscript_Simulations", "results")
@@ -342,7 +343,7 @@ fig3c <- ggplot(s1_nsize, aes(x = n_label, y = t1e, fill = method_label)) +
 # NOTE: We intentionally do NOT save a standalone 3-panel Study 1 figure. The
 # manuscript Figure 2 is the merged 5-panel figure (figure2_combined, further
 # below), which reuses panels fig3a/fig3b/fig3c. A separate
-# "figure2_study1_natmed" file is not a manuscript figure, so it is not emitted.
+# "figure2_study1" file is not a manuscript figure, so it is not emitted.
 
 
 # ==============================================================================
@@ -543,7 +544,7 @@ fig4b <- ggplot(s2_dir_all, aes(x = beta_label, y = pct_correct,
 # NOTE: We intentionally do NOT save a standalone 2-panel Study 2 figure. Its
 # panels fig4a/fig4b are merged into the manuscript Figure 2 (figure2_combined,
 # below). Manuscript Figure 3 is figure_hr_aabc_panel, so a separate
-# "figure3_study2_natmed" file is not a manuscript figure and is no longer
+# "figure3_study2" file is not a manuscript figure and is no longer
 # emitted.
 
 
@@ -569,7 +570,7 @@ fig4b <- ggplot(s2_dir_all, aes(x = beta_label, y = pct_correct,
 .method_levels <- c("Standard", "TV-BC", "TV-AABC β", "TV-AABC γ")
 
 # Build the combined figure with a single shared legend AND compact panels
-# so the entire 5-panel figure fits on one Nature Medicine page (~7.2 × 9 in
+# so the entire 5-panel figure fits on a single journal page (~7.2 × 9 in
 # usable). Compact strategy:
 #  - Suppress fill legends on every panel except fig4a (canonical 4-level)
 #  - Apply a compact theme via patchwork's `&` operator: smaller axis text
@@ -735,7 +736,7 @@ save_figure(supp_fig2, "supp_figure2_hr_boxplots", width = 12, height = 5)
 # Summary
 # ==============================================================================
 
-cat("\n=== All NatMed figures saved to:", fig_dir, "===\n")
+cat("\n=== All manuscript figures saved to:", fig_dir, "===\n")
 cat("Files:\n")
 for (f in sort(list.files(fig_dir, pattern = "figure"))) {
   cat("  ", f, "\n")

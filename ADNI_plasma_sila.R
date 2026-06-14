@@ -24,7 +24,8 @@ library(silaR)
 library(tibble)
 
 # ---- Paths ---- #
-project_root <- Sys.getenv("CP_PROJECT_ROOT", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Analysis")
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
 data_dir     <- file.path(project_root, "data")
 bio_dir      <- file.path(data_dir, "ADNI_Biospecimen_28Feb2026")
 c2n_dir      <- file.path(data_dir, "C2N_Precivity_28Feb2026")

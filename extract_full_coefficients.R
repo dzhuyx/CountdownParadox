@@ -17,7 +17,8 @@
 rm(list = ls())
 library(survival)
 
-project_root <- Sys.getenv("CP_PROJECT_ROOT", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Analysis")
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
 data_dir     <- file.path(project_root, "data")
 results_dir  <- file.path(project_root, "results")
 

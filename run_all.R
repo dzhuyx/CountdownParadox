@@ -1,7 +1,7 @@
 # ==============================================================================
 # run_all.R — Master reproducibility pipeline
 #
-# Runs all real-data analyses for the Nature Medicine manuscript end-to-end.
+# Runs all real-data analyses for the manuscript end-to-end.
 # Does NOT duplicate code — sources scripts from this reproducibility folder.
 #
 # Usage: Rscript run_all.R   (from any directory)
@@ -24,8 +24,21 @@ cat("=== Countdown Paradox: Manuscript Reproducibility Pipeline ===\n")
 cat("Started:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
 
 # -- Paths -------------------------------------------------------------------
-# All scripts are in this directory (the reproducibility folder)
-script_dir <- Sys.getenv("CP_SCRIPT_DIR", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Manuscript_NatMed/reproducibility")
+# All analysis scripts live in this folder. Locate it portably (works with
+# `Rscript run_all.R` or source()), derive the project root from it, and
+# expose both to the child scripts via environment variables.
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  fa <- grep("^--file=", args, value = TRUE)
+  if (length(fa)) return(dirname(normalizePath(sub("^--file=", "", fa[length(fa)]))))
+  if (!is.null(sys.frames()[[1]]$ofile)) return(dirname(normalizePath(sys.frames()[[1]]$ofile)))
+  normalizePath(getwd())
+}
+script_dir   <- Sys.getenv("CP_SCRIPT_DIR")
+if (script_dir == "") script_dir <- get_script_dir()
+project_dir  <- dirname(dirname(script_dir))
+project_root <- file.path(project_dir, "CountdownParadox_Analysis")
+Sys.setenv(CP_PROJECT_DIR = project_dir, CP_PROJECT_ROOT = project_root)
 
 cat("Script directory:", script_dir, "\n\n")
 
@@ -139,11 +152,11 @@ cat("  Pre-existing summary CSVs in CountdownParadox_Manuscript_Simulations/resu
 # ==============================================================================
 cat("=== Phase 5: Tables & Figures ===\n")
 
-cat("[1/3] create_natmed_tables.R...\n")
-run_script("create_natmed_tables.R")
+cat("[1/3] create_manuscript_tables.R...\n")
+run_script("create_manuscript_tables.R")
 
-cat("[2/3] create_natmed_figures.R...\n")
-run_script("create_natmed_figures.R")
+cat("[2/3] create_manuscript_figures.R...\n")
+run_script("create_manuscript_figures.R")
 
 # Manuscript Figure 3 (HR as a function of AABC, 5-panel).
 cat("[3/3] figure_hr_aabc_panel.R...\n")

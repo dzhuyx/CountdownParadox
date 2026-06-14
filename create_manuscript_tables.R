@@ -1,7 +1,7 @@
 # ==============================================================================
-# create_natmed_tables.R
+# create_manuscript_tables.R
 #
-# Formatted CSV tables for the Nature Medicine manuscript.
+# Formatted CSV tables for the manuscript.
 # Main tables + supplementary tables.
 #
 # Output: CSV files in CountdownParadox_Analysis/results/manuscript_tables/
@@ -21,12 +21,12 @@ library(dplyr)
 library(tidyr)
 
 # -- Paths -------------------------------------------------------------------
-project_dir  <- Sys.getenv("CP_PROJECT_DIR", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity")
+project_dir  <- Sys.getenv("CP_PROJECT_DIR")
+if (project_dir == "") stop("CP_PROJECT_DIR is not set. Run via run_all.R, or set it to the project root.")
 project_root <- file.path(project_dir, "CountdownParadox_Analysis")
 analysis_dir <- project_root
 results_dir  <- file.path(project_root, "results")
 sim_dir      <- file.path(project_dir, "CountdownParadox_Manuscript_Simulations", "results")
-repro_dir    <- file.path(project_dir, "CountdownParadox_Manuscript_NatMed", "reproducibility")
 out_dir      <- file.path(results_dir, "manuscript_tables")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -638,7 +638,7 @@ if (file.exists(full_coefs_file)) {
 #   * Study 2 split into 6 grouped tables (Tables 2-7)
 #   * LOGICAL method order throughout: Standard countdown, TV-BC, TV-AABC b, TV-AABC g
 #   * Table 8: 15 model blocks (header rows), humanized parameters, merged HR+P
-# Verified cell-identical to CountdownParadox_NatMed_Supplementary (v7).
+# Verified cell-identical to the manuscript supplement (v7).
 # Output: SuppTable_1.csv ... SuppTable_8.csv
 # ==============================================================================
 
@@ -729,8 +729,8 @@ cat("  Wrote SuppTable_1.csv ... SuppTable_8.csv (manuscript-exact, logical meth
 # Summary
 # ==============================================================================
 
-cat("\n===== All NatMed tables created =====\n")
+cat("\n===== All manuscript tables created =====\n")
 cat("Output directory:", out_dir, "\n")
-for (f in sort(list.files(out_dir, pattern = "natmed|Supp|Table"))) {
+for (f in sort(list.files(out_dir, pattern = "Supp|Table"))) {
   cat("  ", f, "\n")
 }

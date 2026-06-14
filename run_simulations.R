@@ -3,7 +3,7 @@
 #
 # Runs both manuscript simulation scripts in full mode (1000 replicates each)
 # and executes the summarizers. Reproduces the per-replicate coefficient
-# estimates and summary statistics used in the Nature Medicine manuscript.
+# estimates and summary statistics used in the manuscript.
 #
 # Audience:
 #   External readers who have cloned the repository and installed R
@@ -37,7 +37,7 @@
 # ==============================================================================
 
 # -- Locate the simulations directory ----------------------------------------
-# This runner lives in CountdownParadox_Manuscript_NatMed/reproducibility/.
+# This runner lives in the project's reproducibility folder.
 # The canonical simulation scripts are in CountdownParadox_Manuscript_Simulations/
 # alongside that (sibling directory). Resolve via relative path first, fall
 # back to the absolute path used in the manuscript authors' working copy.
@@ -54,7 +54,8 @@ if (!is.null(this_file) && nzchar(this_file)) {
     mustWork = FALSE
   )
 } else {
-  sim_dir <- Sys.getenv("CP_SIM_DIR", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Manuscript_Simulations")
+  sim_dir <- Sys.getenv("CP_SIM_DIR")
+  if (sim_dir == "") stop("Could not locate the simulations folder; set CP_SIM_DIR to <project>/CountdownParadox_Manuscript_Simulations.")
 }
 
 if (!dir.exists(sim_dir)) {

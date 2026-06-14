@@ -16,7 +16,8 @@ cat("  VARIABLE MAPPING VALIDATION\n")
 cat("  Date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
 cat("=======================================================================\n\n")
 
-project_root <- Sys.getenv("CP_PROJECT_ROOT", "/Users/daisyzhu/Documents/Research Projects/CountdownParadox_BiomarkerPositivity/CountdownParadox_Analysis")
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
 data_dir <- file.path(project_root, "data")
 
 n_pass <- 0
