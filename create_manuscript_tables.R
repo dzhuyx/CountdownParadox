@@ -4,7 +4,7 @@
 # Formatted CSV tables for the manuscript.
 # Main tables + supplementary tables.
 #
-# Output: CSV files in CountdownParadox_Analysis/results/manuscript_tables/
+# Output: CSV files in <CP_PROJECT_ROOT>/results/manuscript_tables/
 #   Table1.csv  — Demographics (4 cohort-subset columns)
 #   Table2.csv  — TVC degeneracy assessment (5 biomarker-cohort rows)
 #   Table3.csv  — Main results (standard + TV-BC + TV-AABC)
@@ -23,7 +23,8 @@ library(tidyr)
 # -- Paths -------------------------------------------------------------------
 project_dir  <- Sys.getenv("CP_PROJECT_DIR")
 if (project_dir == "") stop("CP_PROJECT_DIR is not set. Run via run_all.R, or set it to the project root.")
-project_root <- file.path(project_dir, "CountdownParadox_Analysis")
+project_root <- Sys.getenv("CP_PROJECT_ROOT")
+if (project_root == "") project_root <- file.path(project_dir, "CountdownParadox_Analysis")
 analysis_dir <- project_root
 results_dir  <- file.path(project_root, "results")
 sim_dir      <- file.path(project_dir, "CountdownParadox_Manuscript_Simulations", "results")

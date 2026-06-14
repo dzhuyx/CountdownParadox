@@ -12,7 +12,7 @@
 ## Input:  BIOCARD_Blood_NTK_Data_2024.09.18.xlsx
 ## Output: data/BIOCARD_plasma_SILA_intermediate.rda
 ##
-## Usage:  source() from CountdownParadox_Analysis/ directory
+## Usage:  run via run_all.R (sets CP_PROJECT_ROOT automatically)
 ##
 ## Author: Yuxin Zhu
 ## Date: March 2026
@@ -26,7 +26,7 @@ library(tibble)
 
 # ---- Paths ---- #
 project_root <- Sys.getenv("CP_PROJECT_ROOT")
-if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set CP_PROJECT_ROOT to the analysis root (the folder that holds data/ and results/).")
 out_dir      <- project_root
 data_dir     <- file.path(project_root, "data")
 biocard_dir  <- Sys.getenv("CP_BIOCARD_DIR")

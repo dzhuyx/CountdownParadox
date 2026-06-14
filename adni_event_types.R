@@ -23,7 +23,7 @@ suppressMessages(library(dplyr))
 
 # ---- Paths ---- #
 project_root <- Sys.getenv("CP_PROJECT_ROOT")
-if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set CP_PROJECT_ROOT to the analysis root (the folder that holds data/ and results/).")
 data_dir  <- file.path(project_root, "data")
 data_2026 <- file.path(project_root, "ADNI_2026_data")
 res_dir   <- file.path(project_root, "results")

@@ -17,7 +17,7 @@ cat("  Date:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
 cat("=======================================================================\n\n")
 
 project_root <- Sys.getenv("CP_PROJECT_ROOT")
-if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to <project>/CountdownParadox_Analysis.")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set CP_PROJECT_ROOT to the analysis root (the folder that holds data/ and results/).")
 data_dir <- file.path(project_root, "data")
 
 n_pass <- 0
