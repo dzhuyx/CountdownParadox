@@ -5,9 +5,9 @@
 # Output: PDF + PNG (300 dpi).
 #
 # Main figures:
-#   Figure 1: TVC Schematic (external)
-#   Figure 2: Study 1 — Type I error (3 panels: Standard, TV methods, sample size)
-#   Figure 3: Study 2 — Type I error across spec sweeps + direction accuracy
+#   Figure 1: TV analysis schematic (external)
+#   Figure 2: Simulation results — Study 1 (panels a–c) and Study 2 (panels d–e)
+#   (Figure 3, HR vs AABC, is produced separately by figure_hr_aabc_panel.R.)
 #
 # Supplementary:
 #   Supp Figure 1: Type I error (15 Study 1 scenarios; S8 excluded, original S9/S10 IDs)
@@ -21,12 +21,11 @@ library(patchwork)
 library(scales)
 
 # -- Paths -------------------------------------------------------------------
-project_dir <- Sys.getenv("CP_PROJECT_DIR")
-if (project_dir == "") stop("CP_PROJECT_DIR is not set. Run via run_all.R, or set it to the project root.")
 analysis_dir <- Sys.getenv("CP_PROJECT_ROOT")
-if (analysis_dir == "") analysis_dir <- file.path(project_dir, "CountdownParadox_Analysis")
+if (analysis_dir == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to the analysis I/O root.")
 results_dir <- file.path(analysis_dir, "results")
-sim_dir <- file.path(project_dir, "CountdownParadox_Manuscript_Simulations", "results")
+# Simulation summary CSVs (study{1,2}/): under CP_SIM_DIR/results if set, else results/.
+sim_dir <- if (nzchar(Sys.getenv("CP_SIM_DIR"))) file.path(Sys.getenv("CP_SIM_DIR"), "results") else results_dir
 fig_dir <- file.path(results_dir, "manuscript_figures")
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
 

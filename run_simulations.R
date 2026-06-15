@@ -16,10 +16,9 @@
 #   PED twin scenario. There is no within-R parallelization in this runner.
 #
 # Manuscript authors:
-#   The published results were produced on the JHPCE cluster as a
-#   75-task SLURM array (see cluster/ in CountdownParadox_Manuscript_Simulations
-#   and §12.3 of simulation_rerun_plan_v1.md). This local runner is
-#   deterministic given the seed and R version — it produces the same
+#   The published results were produced on the JHPCE cluster as a 75-task
+#   SLURM array distributed alongside the simulation scripts. This local runner
+#   is deterministic given the seed and R version — it produces the same
 #   per-replicate estimates as the cluster run.
 #
 # Usage:
@@ -37,28 +36,12 @@
 # ==============================================================================
 
 # -- Locate the simulations directory ----------------------------------------
-# This runner lives in the project's reproducibility folder.
-# The canonical simulation scripts are in CountdownParadox_Manuscript_Simulations/
-# alongside that (sibling directory). Resolve via relative path first, fall
-# back to the absolute path used in the manuscript authors' working copy.
-
-# Locate the simulations folder. Precedence: (1) CP_SIM_DIR if set;
-# (2) the manuscript authors' sibling layout, located portably (works under
-# `Rscript` or `source()`); (3) stop with guidance (a standalone clone that
-# re-runs simulations must set CP_SIM_DIR).
+# The simulation scripts (study1_simulation.R, study2_simulation.R, and the
+# summarizers) are distributed separately from this repository. Point CP_SIM_DIR
+# at the folder that holds them.
 sim_dir <- Sys.getenv("CP_SIM_DIR")
-if (sim_dir == "") {
-  args <- commandArgs(trailingOnly = FALSE)
-  fa <- grep("^--file=", args, value = TRUE)
-  here <- if (length(fa)) dirname(normalizePath(sub("^--file=", "", fa[length(fa)])))
-          else if (!is.null(sys.frame(1)$ofile)) dirname(normalizePath(sys.frame(1)$ofile))
-          else normalizePath(getwd())
-  cand <- normalizePath(file.path(here, "..", "..", "CountdownParadox_Manuscript_Simulations"),
-                        mustWork = FALSE)
-  if (dir.exists(cand)) sim_dir <- cand
-}
 if (sim_dir == "" || !dir.exists(sim_dir)) {
-  stop("Cannot locate the simulations folder. Set CP_SIM_DIR to the CountdownParadox_Manuscript_Simulations directory.")
+  stop("Set CP_SIM_DIR to the folder containing the simulation scripts (study1_simulation.R, study2_simulation.R, and the summarizers).")
 }
 
 # -- Banner + confirmation gate ----------------------------------------------

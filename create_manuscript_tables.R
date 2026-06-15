@@ -21,13 +21,12 @@ library(dplyr)
 library(tidyr)
 
 # -- Paths -------------------------------------------------------------------
-project_dir  <- Sys.getenv("CP_PROJECT_DIR")
-if (project_dir == "") stop("CP_PROJECT_DIR is not set. Run via run_all.R, or set it to the project root.")
 project_root <- Sys.getenv("CP_PROJECT_ROOT")
-if (project_root == "") project_root <- file.path(project_dir, "CountdownParadox_Analysis")
+if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or set it to the analysis I/O root.")
 analysis_dir <- project_root
 results_dir  <- file.path(project_root, "results")
-sim_dir      <- file.path(project_dir, "CountdownParadox_Manuscript_Simulations", "results")
+# Simulation summary CSVs (study{1,2}/): under CP_SIM_DIR/results if set, else results/.
+sim_dir      <- if (nzchar(Sys.getenv("CP_SIM_DIR"))) file.path(Sys.getenv("CP_SIM_DIR"), "results") else results_dir
 out_dir      <- file.path(results_dir, "manuscript_tables")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 

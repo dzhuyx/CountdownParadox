@@ -36,23 +36,15 @@ get_script_dir <- function() {
 }
 script_dir   <- Sys.getenv("CP_SCRIPT_DIR")
 if (script_dir == "") script_dir <- get_script_dir()
-# project_dir holds CountdownParadox_Analysis/ and
-# CountdownParadox_Manuscript_Simulations/. Resolution precedence:
-#   1. CP_PROJECT_DIR, if set;
-#   2. the manuscript authors' grandparent layout, but only if it actually
-#      contains CountdownParadox_Analysis/;
-#   3. the repository folder itself, so a standalone clone is self-contained
-#      (the sub-folders are then created/expected directly under the repository).
-project_dir <- Sys.getenv("CP_PROJECT_DIR")
-if (project_dir == "") {
-  cand <- dirname(dirname(script_dir))
-  project_dir <- if (dir.exists(file.path(cand, "CountdownParadox_Analysis"))) cand else script_dir
-}
+# The repository is self-contained: analysis I/O (data/, results/, and the raw
+# ADNI_2026_data/ inputs) lives under the project root, which defaults to this
+# repository folder. Set CP_PROJECT_ROOT to redirect that I/O elsewhere.
 project_root <- Sys.getenv("CP_PROJECT_ROOT")
-if (project_root == "") project_root <- file.path(project_dir, "CountdownParadox_Analysis")
-Sys.setenv(CP_PROJECT_DIR = project_dir, CP_PROJECT_ROOT = project_root)
+if (project_root == "") project_root <- script_dir
+Sys.setenv(CP_PROJECT_ROOT = project_root)
 
-cat("Script directory:", script_dir, "\n\n")
+cat("Script directory:", script_dir, "\n")
+cat("Project root (data/, results/):", project_root, "\n\n")
 
 # Helper: source a script in an isolated environment so rm(list=ls())
 # inside the script doesn't clear our variables here.
@@ -157,7 +149,7 @@ cat("\n")
 # ==============================================================================
 cat("=== Phase 4: Simulation Summarization — SKIPPED ===\n")
 cat("  Simulations are re-run on cluster. See run_simulations.R.\n")
-cat("  Pre-existing summary CSVs in CountdownParadox_Manuscript_Simulations/results/ are used.\n\n")
+cat("  Pre-existing simulation summary CSVs are used (set CP_SIM_DIR, or place them under results/study{1,2}/).\n\n")
 
 # ==============================================================================
 # Phase 5: Tables & Figures

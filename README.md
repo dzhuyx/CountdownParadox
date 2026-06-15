@@ -12,7 +12,7 @@ Sys.setenv(CP_BIOCARD_DIR = "/path/to/raw/BIOCARD/data")
 source("run_all.R")
 ```
 
-This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_all.R` locates itself and resolves all project paths automatically: in the manuscript authors' directory tree it uses the existing `CountdownParadox_Analysis/` folder, and from a standalone clone it falls back to a self-contained layout **under the repository** (creating `CountdownParadox_Analysis/data/` and `.../results/`). Two raw-data inputs must be in place first: (1) set `CP_BIOCARD_DIR` to the raw BIOCARD data folder, and (2) put the raw ADNI data files in `<project_root>/ADNI_2026_data/`. Any location can be redirected via the environment variables listed under Requirements. Simulations are not re-run; only summarized from existing per-replicate results.
+This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_all.R` locates itself and treats the repository folder as the project root, so a checkout is self-contained: it reads and writes `data/` and `results/` **under the repository**. Two raw-data inputs must be in place first: (1) set `CP_BIOCARD_DIR` to the raw BIOCARD data folder, and (2) put the raw ADNI data files in `<project_root>/ADNI_2026_data/`. Any location can be redirected via the environment variables listed under Requirements. Simulations are not re-run; only summarized from existing per-replicate results.
 
 ## Pipeline Overview
 
@@ -25,7 +25,7 @@ This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_a
 | 2. Main analysis            | BIOCARD\_ADNI\_main\_analysis.R, extract\_full\_coefficients.R                                                                                                                | main\_results\_all\_biomarkers.csv, degeneracy\_all\_biomarkers.csv, sample\_sizes\_all\_biomarkers.csv, full\_coefficients\_all\_models.csv | \~5 min |
 | 3b. Manuscript descriptives | compute\_manuscript\_descriptives.R, adni\_event\_types.R                                                                                                                     | table1\_demographics.csv, person\_years\_by\_ztv.csv, eaoa\_summary.csv, adni\_event\_types.csv                                              | \~1 min |
 | 4. Simulation summary       | Skipped (run on cluster separately)                                                                                                                                           | results/study{1,2}/summary\_results.csv                                                                                                      | N/A     |
-| 5. Tables & figures         | create\_manuscript\_tables.R, create\_manuscript\_figures.R                                                                                                                           | results/manuscript\_tables/, results/manuscript\_figures/                                                                                    | \~5 min |
+| 5. Tables & figures         | create\_manuscript\_tables.R, create\_manuscript\_figures.R, figure\_hr\_aabc\_panel.R                                                                                                | results/manuscript\_tables/, results/manuscript\_figures/                                                                                    | \~5 min |
 
 ## Analysis Scripts
 
@@ -46,7 +46,7 @@ This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_a
 | Script | Input | Output | Description |
 | ------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BIOCARD_ADNI_main_analysis.R` | Phase 1 outputs + ADNI pre-computed CSVs | main\_results\_all\_biomarkers.csv, degeneracy\_all\_biomarkers.csv, sample\_sizes\_all\_biomarkers.csv | **Canonical analysis script**. Runs standard countdown (P1), TV-BC (P2), and TV-AABC (P3) models for all 5 biomarker-cohort combinations. BIOCARD results computed live; ADNI results carried forward from pre-computed CSVs. Includes runtime assertions for onset.age/censor.age. |
-| `extract_full_coefficients.R` | Phase 1 .rda files | full\_coefficients\_all\_models.csv | Re-runs all 15 Cox PH models and extracts ALL coefficients (not just target effects) for Supp Table S8. |
+| `extract_full_coefficients.R` | Phase 1 .rda files | full\_coefficients\_all\_models.csv, fits\_p2\_p3\_all.rds | Re-runs all 15 Cox PH models and extracts ALL coefficients (not just target effects) for Supp Table S8; also saves the fitted P2/P3 models (`fits_p2_p3_all.rds`) used by `figure_hr_aabc_panel.R`. |
 
 ### Phase 1b: Variable Validation (Safeguard)
 
@@ -63,7 +63,7 @@ This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_a
 
 ### Phase 4: Simulations
 
-The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_summarize.R`, `study2_summarize.R`) reside in the sibling `CountdownParadox_Manuscript_Simulations/` directory, not in this repository; `run_simulations.R` (in this repository) is the runner that invokes them. The main pipeline only summarizes their saved per-replicate results.
+The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_summarize.R`, `study2_summarize.R`) are distributed separately from this repository; `run_simulations.R` (in this repository) is the runner that invokes them — set `CP_SIM_DIR` to the folder that holds them. The main pipeline only summarizes their saved per-replicate results.
 
 | Script | Input | Output | Description |
 | --------------------- | ------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -78,7 +78,8 @@ The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_su
 | Script | Input | Output | Description |
 | ------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `create_manuscript_tables.R` | main\_results\_all\_biomarkers.csv, degeneracy\_all\_biomarkers.csv, table1\_demographics.csv | results/manuscript\_tables/\*.csv | Generates Tables 1-3 for the manuscript. All values read dynamically from upstream CSVs. |
-| `create_manuscript_figures.R` | Phase 2-3b outputs + simulation summaries | results/manuscript\_figures/*.pdf,*.png | Generates all main + supplementary figures. Uses Okabe-Ito colorblind-safe palette. Person-years and EAOA values read dynamically. |
+| `create_manuscript_figures.R` | Phase 2-3b outputs + simulation summaries | results/manuscript\_figures/*.pdf,*.png | Generates the main simulation figure (Figure 2: Study 1 panels a–c, Study 2 panels d–e) and the supplementary figures. Uses Okabe-Ito colorblind-safe palette. Person-years and EAOA values read dynamically. |
+| `figure_hr_aabc_panel.R` | results/fits\_p2\_p3\_all.rds (from `extract_full_coefficients.R`) | results/manuscript\_figures/figure\_hr\_aabc\_panel.pdf, .png | Generates Figure 3: hazard ratio of MCI onset as a function of AABC, five biomarker-cohort panels. |
 
 ### Validation Scripts
 
@@ -132,16 +133,15 @@ The full simulations (Study 1 + Study 2) take \~6 hours total and were run on th
   remotes::install_github("Betthauser-Neuro-Lab/silaR")
   ```
 
-- **Simulations** (scripts in `CountdownParadox_Manuscript_Simulations/`): additionally require lme4 and MASS
+- **Simulations** (scripts distributed separately; point `CP_SIM_DIR` at them): additionally require lme4 and MASS
 
-- **Directory structure**: `run_all.R` resolves the project root automatically — it uses the authors' layout (`CountdownParadox_Analysis/` and `CountdownParadox_Manuscript_Simulations/` as siblings under a common project root) when present, and otherwise treats the repository folder itself as the project root (a self-contained clone). No paths are hardcoded; all I/O is relative to the resolved root.
+- **Directory structure**: `run_all.R` treats the repository folder itself as the project root, so the checkout is self-contained — `data/`, `results/`, and the raw `ADNI_2026_data/` inputs all live under the repository. No paths are hardcoded; all I/O is relative to the resolved root, and `CP_PROJECT_ROOT` can redirect it.
 
 - **Environment variables** — `run_all.R` respects any of these that are already set and derives the rest, so the pipeline runs from a checkout in any location:
 
   - `CP_BIOCARD_DIR` — **required**: folder with the raw BIOCARD data files.
-  - `CP_PROJECT_ROOT` — optional: where analysis I/O lives (`data/`, `results/`, and the raw `ADNI_2026_data/`). Defaults to `CountdownParadox_Analysis` under the resolved project root (i.e. under the repository for a standalone clone).
-  - `CP_PROJECT_DIR` — optional: the parent holding `CountdownParadox_Analysis/` and `CountdownParadox_Manuscript_Simulations/`; set it to relocate both.
-  - `CP_SIM_DIR` — optional (used by `run_simulations.R`): the `CountdownParadox_Manuscript_Simulations` folder.
+  - `CP_PROJECT_ROOT` — optional: where analysis I/O lives (`data/`, `results/`, and the raw `ADNI_2026_data/`). Defaults to the repository folder.
+  - `CP_SIM_DIR` — optional: the folder holding the simulation scripts and their `results/` — used by `run_simulations.R` to run them, and by the table/figure scripts to read the simulation summaries. If unset, simulation summaries are read from `results/study{1,2}/`.
   - `CP_SCRIPT_DIR` — optional: overrides the detected location of this repository.
 
 ## License
