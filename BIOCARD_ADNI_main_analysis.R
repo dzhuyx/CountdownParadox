@@ -458,6 +458,13 @@ stopifnot("estpos_ptau must be defined for all merged subjects" =
 # --- BIOCARD plasma SILA (Component B) --- #
 load(file.path(data_dir, "BIOCARD_plasma_SILA_intermediate.rda"))
 
+# Plasma sub-study left truncation: plasma p-tau181 is measured only in the JHU phase,
+# so the plasma cohort enters at the JHU-phase baseline (first plasma draw) and must be
+# cognitively unimpaired at that point. Drop subjects with no follow-up after the JHU
+# baseline; entry (jhu_baseline_age) then coincides with the CU-at-JHU-baseline condition
+# (no immortal person-time). SILA EAOA values are unchanged (SILA is not re-run).
+plasma_analysis <- plasma_analysis[which(plasma_analysis$onset.age > plasma_analysis$jhu_baseline_age), ]
+
 # Keep EAOA values for all subjects; estpos used by create_tvc_data
 cat(sprintf("Plasma SILA: %d subjects, %d positive (estpos=1), %d events\n",
             nrow(plasma_analysis),
@@ -513,7 +520,7 @@ all_degen   <- rbind(all_degen, out_c2$degeneracy)
 out_c3 <- run_three_models(
       dat = plasma_analysis,
       eaoa_col = "EAOA_plasma",
-      entry_col = "baseline.age",
+      entry_col = "jhu_baseline_age",
       exit_col = "onset.age",
       event_col = "d",
       biomarker_label = "Plasma_pTau181",

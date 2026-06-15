@@ -230,6 +230,11 @@ cat(sprintf("BIOCARD CSF: %d subjects (complete covariates), AB positive=%d, PTA
 # Plasma SILA
 load(file.path(data_dir, "BIOCARD_plasma_SILA_intermediate.rda"))
 
+# Plasma sub-study: left-truncate at the JHU-phase baseline; require CU there. Drop
+# subjects with no follow-up after the JHU baseline (consistent with the main analysis),
+# and report entry age / follow-up from the JHU baseline.
+plasma_analysis <- plasma_analysis[which(plasma_analysis$onset.age > plasma_analysis$jhu_baseline_age), ]
+
 sila_diag[["BC_Plasma"]] <- data.frame(
       biomarker = "Plasma_pTau181", cohort = "BIOCARD",
       n_sila_total = nrow(plasma_analysis),
@@ -365,9 +370,9 @@ demo_rows[["BIOCARD_CSF"]] <- compute_demographics(
       censor_col = "censor.age", educ_raw_col = "EDUC"
 )
 
-# BIOCARD Plasma
+# BIOCARD Plasma (entry = JHU-phase baseline; follow-up measured from there)
 demo_rows[["BIOCARD_Plasma"]] <- compute_demographics(
-      dat_bc_plasma, "baseline.age", "onset.age", "d",
+      dat_bc_plasma, "jhu_baseline_age", "onset.age", "d",
       censor_col = "censor.age", educ_raw_col = "EDUC"
 )
 
@@ -430,7 +435,7 @@ py_ptau$cohort <- "BIOCARD"
 py_rows[["BC_PTAU"]] <- py_ptau
 
 # BIOCARD Plasma p-tau181
-tvc_plasma <- create_tvc_data(dat_bc_plasma, "EAOA_plasma", "baseline.age", "onset.age", "d",
+tvc_plasma <- create_tvc_data(dat_bc_plasma, "EAOA_plasma", "jhu_baseline_age", "onset.age", "d",
                               estpos_col = "estpos")
 py_plasma <- compute_person_years(tvc_plasma)
 py_plasma$biomarker <- "Plasma_pTau181"

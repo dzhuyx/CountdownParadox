@@ -222,6 +222,10 @@ dat_biocard_csf <- merge(dat_biocard_csf,
 
 load(file.path(data_dir, "BIOCARD_plasma_SILA_intermediate.rda"))
 
+# Plasma sub-study: left-truncate at the JHU-phase baseline; require CU there. Drop
+# subjects with no follow-up after the JHU baseline (consistent with the main analysis).
+plasma_analysis <- plasma_analysis[which(plasma_analysis$onset.age > plasma_analysis$jhu_baseline_age), ]
+
 
 ###############################################################################
 ## SECTION 2: ADNI PET data loading (from ADNI_SILA_reanalysis_v2.R)
@@ -367,7 +371,7 @@ all_fits[["BIOCARD_CSF_pTau181"]] <- out$fit_meta
 # C3: BIOCARD plasma p-tau181
 out <- run_all_models(
       dat = plasma_analysis, eaoa_col = "EAOA_plasma",
-      entry_col = "baseline.age", exit_col = "onset.age", event_col = "d",
+      entry_col = "jhu_baseline_age", exit_col = "onset.age", event_col = "d",
       biomarker_label = "Plasma_pTau181", cohort_label = "BIOCARD",
       estpos_col = "estpos"
 )
