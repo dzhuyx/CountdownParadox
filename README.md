@@ -12,7 +12,7 @@ Sys.setenv(CP_BIOCARD_DIR = "/path/to/raw/BIOCARD/data")
 source("run_all.R")
 ```
 
-This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_all.R` locates itself and treats the repository folder as the project root, so a checkout is self-contained: it reads and writes `data/` and `results/` **under the repository**. Two raw-data inputs must be in place first: (1) set `CP_BIOCARD_DIR` to the raw BIOCARD data folder, and (2) put the raw ADNI data files in `<project_root>/ADNI_2026_data/`. Any location can be redirected via the environment variables listed under Requirements. Simulations are not re-run; only summarized from existing per-replicate results.
+This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_all.R` locates itself and treats the repository folder as the project root, so a checkout is self-contained: it reads and writes `data/` and `results/` **under the repository**. Two raw-data inputs must be in place first: (1) set `CP_BIOCARD_DIR` to the raw BIOCARD data folder, and (2) put the raw ADNI data files in `<project_root>/ADNI_2026_data/`. Any location can be redirected via the environment variables listed under Requirements. `run_all.R` does not re-run the simulations; it reuses their saved outputs in `results/study{1,2}/`. To (re)generate those outputs from scratch, run `run_simulations.R` first (see Phase 4).
 
 ## Pipeline Overview
 
@@ -24,7 +24,7 @@ This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_a
 | 1b. Variable validation     | validate\_variables.R                                                                                                                                                         | console (13 checks)                                                                                                                          | \~1 sec |
 | 2. Main analysis            | BIOCARD\_ADNI\_main\_analysis.R, extract\_full\_coefficients.R                                                                                                                | main\_results\_all\_biomarkers.csv, degeneracy\_all\_biomarkers.csv, sample\_sizes\_all\_biomarkers.csv, full\_coefficients\_all\_models.csv | \~5 min |
 | 3b. Manuscript descriptives | compute\_manuscript\_descriptives.R, adni\_event\_types.R                                                                                                                     | table1\_demographics.csv, person\_years\_by\_ztv.csv, eaoa\_summary.csv, adni\_event\_types.csv                                              | \~1 min |
-| 4. Simulation summary       | Skipped (run on cluster separately)                                                                                                                                           | results/study{1,2}/summary\_results.csv                                                                                                      | N/A     |
+| 4. Simulations              | Not re-run by `run_all.R`; (re)generate with `run_simulations.R`                                                                                                             | results/study{1,2}/summary\_results.csv, all\_results.rds                                                                                     | ~12 h   |
 | 5. Tables & figures         | create\_manuscript\_tables.R, create\_manuscript\_figures.R, figure\_hr\_aabc\_panel.R                                                                                                | results/manuscript\_tables/, results/manuscript\_figures/                                                                                    | \~5 min |
 
 ## Analysis Scripts
@@ -63,7 +63,7 @@ This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_a
 
 ### Phase 4: Simulations
 
-The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_summarize.R`, `study2_summarize.R`) are distributed separately from this repository; `run_simulations.R` (in this repository) is the runner that invokes them — set `CP_SIM_DIR` to the folder that holds them. The main pipeline only summarizes their saved per-replicate results.
+The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_summarize.R`, `study2_summarize.R`) are included in this repository. `run_simulations.R` runs all four end-to-end (~11–12 h on a single core) and writes per-replicate estimates and summaries to `results/study{1,2}/`. No simulation outputs are distributed with the repository — run `run_simulations.R` to (re)generate them. `run_all.R` does not re-run the simulations; it only reads their summaries when building tables and figures.
 
 | Script | Input | Output | Description |
 | --------------------- | ------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -133,7 +133,7 @@ The full simulations (Study 1 + Study 2) take \~6 hours total and were run on th
   remotes::install_github("Betthauser-Neuro-Lab/silaR")
   ```
 
-- **Simulations** (scripts distributed separately; point `CP_SIM_DIR` at them): additionally require lme4 and MASS
+- **Simulations** (`study1_simulation.R` / `study2_simulation.R` and their summarizers, included here; run via `run_simulations.R`): additionally require lme4 and MASS
 
 - **Directory structure**: `run_all.R` treats the repository folder itself as the project root, so the checkout is self-contained — `data/`, `results/`, and the raw `ADNI_2026_data/` inputs all live under the repository. No paths are hardcoded; all I/O is relative to the resolved root, and `CP_PROJECT_ROOT` can redirect it.
 
@@ -141,7 +141,7 @@ The full simulations (Study 1 + Study 2) take \~6 hours total and were run on th
 
   - `CP_BIOCARD_DIR` — **required**: folder with the raw BIOCARD data files.
   - `CP_PROJECT_ROOT` — optional: where analysis I/O lives (`data/`, `results/`, and the raw `ADNI_2026_data/`). Defaults to the repository folder.
-  - `CP_SIM_DIR` — optional: the folder holding the simulation scripts and their `results/` — used by `run_simulations.R` to run them, and by the table/figure scripts to read the simulation summaries. If unset, simulation summaries are read from `results/study{1,2}/`.
+  - `CP_SIM_DIR` — optional: point at a separate working copy of the simulation scripts / their `results/`. By default the scripts in this repository are used and their outputs are read from `results/study{1,2}/`.
   - `CP_SCRIPT_DIR` — optional: overrides the detected location of this repository.
 
 ## License

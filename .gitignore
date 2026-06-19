@@ -1,0 +1,17 @@
+# This repository publishes CODE ONLY — no data or generated outputs.
+# A replicator supplies controlled-access cohort data and regenerates all
+# results by running the scripts (see README).
+
+# Raw / controlled-access cohort data
+data/
+ADNI_2026_data/
+*.rda
+*.rds
+*.xlsx
+*.xls
+
+# Generated analysis & simulation outputs
+results/
+
+# OS / editor cruft
+.DS_Store
