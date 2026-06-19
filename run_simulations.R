@@ -37,11 +37,21 @@
 
 # -- Locate the simulations directory ----------------------------------------
 # The simulation scripts (study1_simulation.R, study2_simulation.R, and the
-# summarizers) are distributed separately from this repository. Point CP_SIM_DIR
-# at the folder that holds them.
+# summarizers) are bundled in this repository. By default they are sourced from
+# the current working directory (run this from the repository root); set
+# CP_SIM_DIR to override, e.g. to point at a separate working copy.
 sim_dir <- Sys.getenv("CP_SIM_DIR")
 if (sim_dir == "" || !dir.exists(sim_dir)) {
-  stop("Set CP_SIM_DIR to the folder containing the simulation scripts (study1_simulation.R, study2_simulation.R, and the summarizers).")
+  sim_dir <- getwd()
+}
+.sim_scripts <- c("study1_simulation.R", "study2_simulation.R",
+                  "study1_summarize.R", "study2_summarize.R")
+.missing <- .sim_scripts[!file.exists(file.path(sim_dir, .sim_scripts))]
+if (length(.missing)) {
+  stop(sprintf(paste0("Simulation scripts not found in '%s': %s.\n",
+                      "Run this from the repository root, or set CP_SIM_DIR to ",
+                      "the folder that holds them."),
+               sim_dir, paste(.missing, collapse = ", ")))
 }
 
 # -- Banner + confirmation gate ----------------------------------------------
