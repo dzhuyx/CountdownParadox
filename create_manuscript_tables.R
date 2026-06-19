@@ -8,7 +8,7 @@
 #   Table1.csv  — Demographics (4 cohort-subset columns)
 #   Table2.csv  — TVC degeneracy assessment (5 biomarker-cohort rows)
 #   Table3.csv  — Main results (standard + TV-BC + TV-AABC)
-#   SuppTable_S1 — Study 1 complete results (16 scenarios × 4 methods)
+#   SuppTable_S1 — Study 1 complete results (15 scenarios × 4 methods)
 #   SuppTable_S2 — Study 2 complete results (59 scenarios × 4 methods)
 #   SuppTable_S3–S5 — Scenario specifications and degeneracy
 #
@@ -224,7 +224,7 @@ print(tab3[, !names(tab3) %in% c("_1", "_2")], right = FALSE, row.names = FALSE)
 
 # ==============================================================================
 # SUPPLEMENTARY TABLE S1: Study 1 Complete Simulation Results
-# 16 scenarios x 4 methods (S8 has Standard only; TV methods not applicable)
+# 15 scenarios x 4 methods
 # Columns: AABC Variance, Event Rate, Type I Error, Mean HR, SD HR
 # ==============================================================================
 
@@ -233,31 +233,9 @@ cat("\n===== Supp Table S1: Study 1 Complete Results =====\n\n")
 s1 <- read.csv(file.path(sim_dir, "study1", "summary_results.csv"),
                stringsAsFactors = FALSE)
 
-# Drop S8 (Minimal AABC-onset overlap): TV methods do not converge, and the
-# manuscript reports 15 scenarios. Keeping S8 reintroduces an awkward
-# "Standard countdown only" row that muddles the narrative.
-s1 <- s1 %>% filter(scenario != "S8")
-
-# Renumber to close the gap left by removing the original S8:
-#   original S9  → new S8 (High AABC variance)
-#   original S10 → new S9 (BIOCARD-calibrated)
-#   original S10_n* → new S9_n* (n-variants)
-s1 <- s1 %>% mutate(
-  scenario = case_when(
-    scenario == "S9"        ~ "S8",
-    scenario == "S10"       ~ "S9",
-    scenario == "S10_n150"  ~ "S9_n150",
-    scenario == "S10_n200"  ~ "S9_n200",
-    scenario == "S10_n1000" ~ "S9_n1000",
-    TRUE ~ scenario
-  ),
-  scenario_name = case_when(
-    grepl("^S9: ",   scenario_name) ~ sub("^S9: ",   "S8: ", scenario_name),
-    grepl("^S10: ",  scenario_name) ~ sub("^S10: ",  "S9: ", scenario_name),
-    grepl("^S10_n", scenario_name) ~ sub("^S10_n", "S9_n", scenario_name),
-    TRUE ~ scenario_name
-  )
-)
+# Study 1 reports 15 scenarios (S1-S9, with S1 and S9 sample-size variants).
+# study1_simulation.R emits these manuscript IDs directly (S8 = High Var(Z),
+# S9 = BIOCARD-calibrated); no relabeling is needed here.
 
 # Build 4 method series by splitting tvc_interaction into beta and gamma rows
 # SD HR computed via delta method: SD(HR) ≈ mean_hr × empirical_se
@@ -305,7 +283,7 @@ s1_out <- s1_tab %>%
 
 write.csv(s1_out, file.path(out_dir, "SuppTable_S1_study1_complete.csv"),
           row.names = FALSE)
-cat(sprintf("Supp Table S1 saved: %d rows (16 scenarios x 4 methods)\n", nrow(s1_out)))
+cat(sprintf("Supp Table S1 saved: %d rows (15 scenarios x 4 methods)\n", nrow(s1_out)))
 
 
 # ==============================================================================

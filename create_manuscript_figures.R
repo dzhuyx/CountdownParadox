@@ -10,7 +10,7 @@
 #   (Figure 3, HR vs AABC, is produced separately by figure_hr_aabc_panel.R.)
 #
 # Supplementary:
-#   Supp Figure 1: Type I error (15 Study 1 scenarios; S8 excluded, original S9/S10 IDs)
+#   Supp Figure 1: Type I error (15 Study 1 scenarios, S1-S9)
 #   Supp Figure 2: HR boxplots under the null
 # ==============================================================================
 
@@ -233,25 +233,8 @@ cat("\n--- Figure 2: Study 1 Simulation ---\n")
 s1 <- read.csv(file.path(sim_dir, "study1", "summary_results.csv"),
                stringsAsFactors = FALSE)
 
-# Exclude S8 (minimal overlap — TV methods not applicable). Then renumber to
-# close the gap: original S9 → new S8, original S10 → new S9 (and n-variants).
-s1 <- s1 %>% filter(scenario != "S8")
-s1 <- s1 %>% mutate(
-  scenario = case_when(
-    scenario == "S9"        ~ "S8",
-    scenario == "S10"       ~ "S9",
-    scenario == "S10_n150"  ~ "S9_n150",
-    scenario == "S10_n200"  ~ "S9_n200",
-    scenario == "S10_n1000" ~ "S9_n1000",
-    TRUE ~ scenario
-  ),
-  scenario_name = case_when(
-    grepl("^S9: ",   scenario_name) ~ sub("^S9: ",   "S8: ", scenario_name),
-    grepl("^S10: ",  scenario_name) ~ sub("^S10: ",  "S9: ", scenario_name),
-    grepl("^S10_n", scenario_name) ~ sub("^S10_n", "S9_n", scenario_name),
-    TRUE ~ scenario_name
-  )
-)
+# Study 1 scenarios use manuscript IDs directly (S8 = High Var(Z),
+# S9 = BIOCARD-calibrated, with S1/S9 sample-size variants).
 
 # Build long-form data with 4 method series
 s1_long <- bind_rows(
@@ -271,7 +254,7 @@ s1_long <- bind_rows(
   mutate(scenario_short = gsub("_n", ", n=", sub(":.*", "", scenario_name)),
          method_label = factor(method_label, levels = method_levels))
 
-# --- Distribution shape scenarios (S1-S5, S8, S9 in renumbered IDs) ---
+# --- Distribution shape scenarios (S1-S5, S8, S9) ---
 distrib_scens <- c("S1", "S2", "S3", "S4", "S5", "S8", "S9")
 distrib_labels <- c("S1" = "Unif\u2013Unif", "S2" = "Norm\u2013Norm",
                     "S3" = "Norm\u2013Weib", "S4" = "Gam\u2013Weib",
@@ -310,7 +293,7 @@ fig3b <- ggplot(s1_distrib %>% filter(method_label != "Standard"),
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 9))
 
 # --- Panel (c): TV methods across sample sizes — bars, grouped ---
-# After renumbering: BIOCARD-calibrated variants are S9_* (was S10_*)
+# BIOCARD-calibrated variants are S9_*
 n_scens <- c("S1_n150", "S1_n200", "S1", "S1_n1000",
              "S9_n150", "S9_n200", "S9", "S9_n1000")
 s1_nsize <- s1_long %>%
@@ -675,17 +658,9 @@ cat("\n--- Supp Figure 2: HR Boxplots Under Null ---\n")
 
 # Load per-replicate data for selected null scenarios
 s1_all <- readRDS(file.path(sim_dir, "study1", "all_results.rds"))
-s1_all <- s1_all %>% filter(scenario != "S8")
-# Renumber to close the gap (S9 \u2192 S8, S10 \u2192 S9) for consistency with Fig 2 and Supp Table 1
-s1_all <- s1_all %>% mutate(
-  scenario = case_when(
-    scenario == "S9"  ~ "S8",
-    scenario == "S10" ~ "S9",
-    TRUE ~ scenario
-  )
-)
+# Study 1 per-replicate data already uses manuscript IDs (S9 = BIOCARD-calibrated).
 
-# Select representative scenarios (note: original S10 is now S9 after relabel)
+# Select representative scenarios
 selected_scen <- c("S1", "S2", "S9")
 sf2_data <- bind_rows(
   s1_all %>%

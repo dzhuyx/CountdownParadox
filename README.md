@@ -67,7 +67,7 @@ The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_su
 
 | Script | Input | Output | Description |
 | --------------------- | ------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `study1_simulation.R` | None (self-contained) | results/study1/all\_results.rds | Study 1: 16 null-effect scenarios (Z independent of T). 1000 replicates. Standard + TVC. |
+| `study1_simulation.R` | None (self-contained) | results/study1/all\_results.rds | Study 1: 15 null-effect configurations (S1-S9 + S1/S9 sample-size variants; Z independent of T). 1000 replicates. Standard + TVC. |
 | `study2_simulation.R` | None (self-contained) | results/study2/all\_results.rds | Study 2: 42+ scenarios with LMM trajectories. Null + alternative effects. |
 | `study1_summarize.R` | results/study1/all\_results.rds | results/study1/summary\_results.csv | Computes Type I error, mean HR, coverage from per-replicate results |
 | `study2_summarize.R` | results/study2/all\_results.rds | results/study2/summary\_results.csv | Computes power, direction accuracy, bias from per-replicate results |

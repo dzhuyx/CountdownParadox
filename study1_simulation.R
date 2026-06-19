@@ -5,8 +5,8 @@
 # Z and T are independent, regardless of their marginal distributions.
 # The time-varying covariate (TVC) analysis correctly maintains Type I error.
 #
-# 16 configurations: 10 base scenarios (S1-S9 pedagogical + S10 BIOCARD)
-#   plus 6 sample-size variants (S1 and S10 at n=150, 200, 1000).
+# 15 configurations: 9 base scenarios (S1-S8 pedagogical + S9 BIOCARD)
+#   plus 6 sample-size variants (S1 and S9 at n=150, 200, 1000).
 #
 # Methods compared:
 #   1. Naive/countdown: Surv(T-Z, event) ~ Z — always biased
@@ -28,17 +28,17 @@ library(dplyr)
 # =============================================================================
 
 MODE <- "full"  # "prototype" or "full"
-# prototype: n_sim=10, configs=c("S1","S10")  (~10 sec)
-# full:      n_sim=1000, all 16 configs       (~60-70 min)
+# prototype: n_sim=10, configs=c("S1","S9")  (~10 sec)
+# full:      n_sim=1000, all 15 configs       (~60-70 min)
 
 if (MODE == "prototype") {
   N_SIM <- 10
-  CONFIG_SUBSET <- c("S1", "S10")
-  cat("=== PROTOTYPE MODE: 10 reps, S1 + S10 only ===\n\n")
+  CONFIG_SUBSET <- c("S1", "S9")
+  cat("=== PROTOTYPE MODE: 10 reps, S1 + S9 only ===\n\n")
 } else {
   N_SIM <- 1000
   CONFIG_SUBSET <- NULL  # Run all
-  cat("=== FULL MODE: 1000 reps, all 16 configs ===\n\n")
+  cat("=== FULL MODE: 1000 reps, all 15 configs ===\n\n")
 }
 
 SEED_BASE <- 12345
@@ -58,12 +58,12 @@ rtruncnorm <- function(n, mean, sd, lower, upper) {
 }
 
 # =============================================================================
-# SECTION 3: SCENARIO DEFINITIONS (16 configurations)
+# SECTION 3: SCENARIO DEFINITIONS (15 configurations)
 # =============================================================================
 
 scenarios <- list(
 
-  # --- Pedagogical Scenarios (S1-S9) ---
+  # --- Pedagogical Scenarios (S1-S8) ---
 
   S1 = list(
     name = "S1: Uniform-Uniform",
@@ -136,16 +136,7 @@ scenarios <- list(
   ),
 
   S8 = list(
-    name = "S8: Minimal Z-T Overlap",
-    generate_Z = function(n) runif(n, 40, 65),
-    generate_T = function(n) runif(n, 70, 95),
-    entry_min = 50, entry_max = 65, duration = 25,
-    max_age = 95, n = 500, family = "PED",
-    pool_mult = POOL_MULT
-  ),
-
-  S9 = list(
-    name = "S9: High Var(Z)",
+    name = "S8: High Var(Z)",
     generate_Z = function(n) rtruncnorm(n, 62, 10, 35, 90),
     generate_T = function(n) rtruncnorm(n, 75, 7, 55, 95),
     entry_min = 55, entry_max = 70, duration = 20,
@@ -153,10 +144,10 @@ scenarios <- list(
     pool_mult = POOL_MULT
   ),
 
-  # --- BIOCARD-Calibrated Scenario (S10) ---
+  # --- BIOCARD-Calibrated Scenario (S9) ---
 
-  S10 = list(
-    name = "S10: BIOCARD-calibrated",
+  S9 = list(
+    name = "S9: BIOCARD-calibrated",
     generate_Z = function(n) rtruncnorm(n, 53, 10, 25, 82),
     generate_T = function(n) rtruncnorm(n, 73, 10, 45, 96),
     entry_min = 40, entry_max = 65, duration = 20,
@@ -193,8 +184,8 @@ scenarios <- list(
     pool_mult = POOL_MULT
   ),
 
-  S10_n150 = list(
-    name = "S10_n150: BIOCARD-calibrated (n=150)",
+  S9_n150 = list(
+    name = "S9_n150: BIOCARD-calibrated (n=150)",
     generate_Z = function(n) rtruncnorm(n, 53, 10, 25, 82),
     generate_T = function(n) rtruncnorm(n, 73, 10, 45, 96),
     entry_min = 40, entry_max = 65, duration = 20,
@@ -202,8 +193,8 @@ scenarios <- list(
     pool_mult = POOL_MULT
   ),
 
-  S10_n200 = list(
-    name = "S10_n200: BIOCARD-calibrated (n=200)",
+  S9_n200 = list(
+    name = "S9_n200: BIOCARD-calibrated (n=200)",
     generate_Z = function(n) rtruncnorm(n, 53, 10, 25, 82),
     generate_T = function(n) rtruncnorm(n, 73, 10, 45, 96),
     entry_min = 40, entry_max = 65, duration = 20,
@@ -211,8 +202,8 @@ scenarios <- list(
     pool_mult = POOL_MULT
   ),
 
-  S10_n1000 = list(
-    name = "S10_n1000: BIOCARD-calibrated (n=1000)",
+  S9_n1000 = list(
+    name = "S9_n1000: BIOCARD-calibrated (n=1000)",
     generate_Z = function(n) rtruncnorm(n, 53, 10, 25, 82),
     generate_T = function(n) rtruncnorm(n, 73, 10, 45, 96),
     entry_min = 40, entry_max = 65, duration = 20,
