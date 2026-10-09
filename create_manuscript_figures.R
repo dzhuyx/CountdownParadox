@@ -51,17 +51,17 @@ lty_aabc_gamma <- "dashed"
 # -- Named vectors for scale_*_manual (used across all figures) ---------------
 method_colors <- c("Standard"       = col_standard,
                    "TV-BC"           = col_tvc,
-                   "TV-AABC \u03b2"  = col_aabc_beta,
-                   "TV-AABC \u03b3"  = col_aabc_gamma)
+                   "TV-AABC HR-\u03b2"  = col_aabc_beta,
+                   "TV-AABC HR-\u03b3"  = col_aabc_gamma)
 method_shapes <- c("Standard"       = shp_standard,
                    "TV-BC"           = shp_tvc,
-                   "TV-AABC \u03b2"  = shp_aabc_beta,
-                   "TV-AABC \u03b3"  = shp_aabc_gamma)
+                   "TV-AABC HR-\u03b2"  = shp_aabc_beta,
+                   "TV-AABC HR-\u03b3"  = shp_aabc_gamma)
 method_linetypes <- c("Standard"       = lty_standard,
                       "TV-BC"           = lty_tvc,
-                      "TV-AABC \u03b2"  = lty_aabc_beta,
-                      "TV-AABC \u03b3"  = lty_aabc_gamma)
-method_levels <- c("Standard", "TV-BC", "TV-AABC \u03b2", "TV-AABC \u03b3")
+                      "TV-AABC HR-\u03b2"  = lty_aabc_beta,
+                      "TV-AABC HR-\u03b3"  = lty_aabc_gamma)
+method_levels <- c("Standard", "TV-BC", "TV-AABC HR-\u03b2", "TV-AABC HR-\u03b3")
 
 # -- Theme (larger fonts for publication) -------------------
 theme_manuscript <- theme_classic(base_size = 14) +
@@ -246,10 +246,10 @@ s1_long <- bind_rows(
     mutate(t1e = type1_error, method_label = "TV-BC"),
   s1 %>%
     filter(method == "tvc_interaction", !is.na(type1_error)) %>%
-    mutate(t1e = type1_error, method_label = "TV-AABC \u03b2"),
+    mutate(t1e = type1_error, method_label = "TV-AABC HR-\u03b2"),
   s1 %>%
     filter(method == "tvc_interaction", !is.na(type1_error_gamma)) %>%
-    mutate(t1e = type1_error_gamma, method_label = "TV-AABC \u03b3")
+    mutate(t1e = type1_error_gamma, method_label = "TV-AABC HR-\u03b3")
 ) %>%
   mutate(scenario_short = gsub("_n", ", n=", sub(":.*", "", scenario_name)),
          method_label = factor(method_label, levels = method_levels))
@@ -258,7 +258,7 @@ s1_long <- bind_rows(
 distrib_scens <- c("S1", "S2", "S3", "S4", "S5", "S8", "S9")
 distrib_labels <- c("S1" = "Unif\u2013Unif", "S2" = "Norm\u2013Norm",
                     "S3" = "Norm\u2013Weib", "S4" = "Gam\u2013Weib",
-                    "S5" = "Beta\u2013Exp",  "S8" = "High Var(Z)",
+                    "S5" = "Beta\u2013Exp",  "S8" = "High AABC variance",
                     "S9" = "BIOCARD\ncalibrated")
 
 s1_distrib <- s1_long %>% filter(scenario %in% distrib_scens)
@@ -345,12 +345,12 @@ s2_long <- bind_rows(
   s2 %>% filter(method == "tvc_z_only") %>%
     mutate(rej = reject_rate, method_label = "TV-BC"),
   s2 %>% filter(method == "tvc_interaction") %>%
-    mutate(rej = reject_rate, method_label = "TV-AABC \u03b2"),
+    mutate(rej = reject_rate, method_label = "TV-AABC HR-\u03b2"),
   s2 %>% filter(method == "tvc_interaction", !is.na(reject_rate_gamma)) %>%
-    mutate(rej = reject_rate_gamma, method_label = "TV-AABC \u03b3")
+    mutate(rej = reject_rate_gamma, method_label = "TV-AABC HR-\u03b3")
 ) %>%
   mutate(method_label = factor(method_label,
-    levels = c("Standard", "TV-BC", "TV-AABC \u03b2", "TV-AABC \u03b3")))
+    levels = c("Standard", "TV-BC", "TV-AABC HR-\u03b2", "TV-AABC HR-\u03b3")))
 
 # --- Panel A: Type I error by spec sweep (4 sub-panels using null scenarios) ---
 
@@ -411,7 +411,7 @@ panel_a_data <- s2_long %>%
                "Measurement\nprecision")))
 
 # Add cohort to distinguish PED vs BIO at colliding spec_vals; each scenario
-# gets its own x-position via a (P)/(B) suffix.
+# gets its own x-position via a (PED)/(BIO) suffix (pedagogical / BIOCARD-resembling).
 panel_a_data <- panel_a_data %>%
   mutate(cohort = factor(ifelse(grepl("-ped", scenario), "PED", "BIO"),
                          levels = c("PED", "BIO")))
@@ -425,7 +425,7 @@ panel_a_data <- panel_a_data %>%
     spec_name == "Measurement\nprecision"    ~ c("1" = "Frequent", "2" = "Base",
                                                   "3" = "Sparse", "4" = "High err.")[as.character(spec_val)]
   ),
-  spec_label = paste0(spec_label_base, " (", substr(as.character(cohort), 1, 1), ")"))
+  spec_label = paste0(spec_label_base, " (", as.character(cohort), ")"))
 
 # Order spec_label within each facet by spec_val then cohort (PED before BIO)
 panel_a_data <- panel_a_data %>%
@@ -464,7 +464,7 @@ s2_dir <- s2 %>%
       method == "tvc_z_only" & beta_true > 0 ~ pct_hr_above_1 * 100,
       method == "tvc_z_only" & beta_true < 0 ~ pct_hr_below_1 * 100),
     method_label = factor(method_label,
-      levels = c("Standard", "TV-BC", "TV-AABC \u03b2", "TV-AABC \u03b3"))
+      levels = c("Standard", "TV-BC", "TV-AABC HR-\u03b2", "TV-AABC HR-\u03b3"))
   )
 
 # Add TV-AABC beta direction accuracy (Z_tv coeff — same direction logic as TV-BC)
@@ -473,8 +473,8 @@ s2_dir_aabc_beta <- s2 %>%
          method == "tvc_interaction",
          beta_true != 0) %>%
   mutate(
-    method_label = factor("TV-AABC \u03b2",
-      levels = c("Standard", "TV-BC", "TV-AABC \u03b2", "TV-AABC \u03b3")),
+    method_label = factor("TV-AABC HR-\u03b2",
+      levels = c("Standard", "TV-BC", "TV-AABC HR-\u03b2", "TV-AABC HR-\u03b3")),
     pct_correct = case_when(
       beta_true > 0 ~ pct_hr_above_1 * 100,
       beta_true < 0 ~ pct_hr_below_1 * 100)
@@ -497,8 +497,8 @@ s2_gamma_dir <- s2_rep %>%
     .groups = "drop"
   ) %>%
   mutate(
-    method_label = factor("TV-AABC \u03b3",
-      levels = c("Standard", "TV-BC", "TV-AABC \u03b2", "TV-AABC \u03b3")),
+    method_label = factor("TV-AABC HR-\u03b3",
+      levels = c("Standard", "TV-BC", "TV-AABC HR-\u03b2", "TV-AABC HR-\u03b3")),
     pct_correct = case_when(
       beta_true > 0 ~ pct_hr_below_1_gamma * 100,   # expect HR_gamma < 1
       beta_true < 0 ~ pct_hr_above_1_gamma * 100)    # expect HR_gamma > 1
@@ -546,11 +546,11 @@ fig4b <- ggplot(s2_dir_all, aes(x = beta_label, y = pct_correct,
 #    its x-axis labels (7-19 categories).
 #  - Single shared legend at the bottom. This requires every panel that shows
 #    a fill legend to declare the SAME 4-level scale (Standard, TV-BC,
-#    TV-AABC β, TV-AABC γ). We rebuild fig3a and fig3b with `limits` set to
+#    TV-AABC HR-β, TV-AABC HR-γ). We rebuild fig3a and fig3b with `limits` set to
 #    all 4 levels so patchwork::plot_layout(guides = "collect") can merge.
 #  - Panels fig3c and fig4b already suppress their own fill legend.
 # ==============================================================================
-.method_levels <- c("Standard", "TV-BC", "TV-AABC β", "TV-AABC γ")
+.method_levels <- c("Standard", "TV-BC", "TV-AABC HR-β", "TV-AABC HR-γ")
 
 # Build the combined figure with a single shared legend AND compact panels
 # so the entire 5-panel figure fits on a single journal page (~7.2 × 9 in
@@ -592,7 +592,7 @@ fig4b_c <- fig4b + .compact_theme
 
 combined_fig2 <- (fig3a_c / fig3b_c / fig3c_c / fig4a_c / fig4b_c) +
   plot_layout(ncol = 1, heights = c(1, 1, 1, 1, 1), guides = "collect") +
-  plot_annotation(tag_levels = "a",
+  plot_annotation(tag_levels = "A",
                   theme = theme(plot.tag = element_text(face = "bold", size = 9))) &
   theme(legend.position = "bottom",
         legend.text = element_text(size = 7))
@@ -643,7 +643,7 @@ sf1b <- ggplot(sf1_data %>% filter(method_label != "Standard"),
 
 supp_fig1 <- sf1a + sf1b +
   plot_layout(ncol = 2, guides = "collect", widths = c(1, 1)) +
-  plot_annotation(tag_levels = "a",
+  plot_annotation(tag_levels = "A",
                   theme = theme(plot.tag = element_text(face = "bold", size = 14))) &
   theme(legend.position = "bottom")
 
@@ -674,11 +674,11 @@ sf2_data <- bind_rows(
   s1_all %>%
     filter(scenario %in% selected_scen, method == "tvc_interaction",
            !is.na(hr), hr > 0, hr < 10) %>%
-    mutate(hr_plot = hr, method_label = "TV-AABC \u03b2"),
+    mutate(hr_plot = hr, method_label = "TV-AABC HR-\u03b2"),
   s1_all %>%
     filter(scenario %in% selected_scen, method == "tvc_interaction",
            !is.na(hr_gamma), hr_gamma > 0, hr_gamma < 10) %>%
-    mutate(hr_plot = hr_gamma, method_label = "TV-AABC \u03b3")
+    mutate(hr_plot = hr_gamma, method_label = "TV-AABC HR-\u03b3")
 ) %>%
   mutate(
     method_label = factor(method_label, levels = method_levels),
