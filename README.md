@@ -14,6 +14,22 @@ source("run_all.R")
 
 This runs the full pipeline end-to-end (\~30 min for real-data analyses). `run_all.R` locates itself and treats the repository folder as the project root, so a checkout is self-contained: it reads and writes `data/` and `results/` **under the repository**. Two raw-data inputs must be in place first: (1) set `CP_BIOCARD_DIR` to the raw BIOCARD data folder, and (2) put the raw ADNI data files in `<project_root>/ADNI_2026_data/`. Any location can be redirected via the environment variables listed under Requirements. `run_all.R` does not re-run the simulations; it reuses their saved outputs in `results/study{1,2}/`. To (re)generate those outputs from scratch, run `run_simulations.R` first (see Phase 4).
 
+## Worked Example on Simulated Data
+
+`tv_worked_example.R` shows, without access to cohort data, how to set up the data and fit the time-varying analyses. It simulates 1,000 people in whom biomarker positivity raises the hazard of MCI onset and the age at positivity (AABC) does not modify that effect, and then:
+
+1. builds start–stop (counting-process) records on the age scale, by hand and with `survival::tmerge()`, and checks that the two give identical fits;
+2. fits the TV-BC and TV-AABC Cox models with `survival::coxph()`;
+3. fits the standard countdown model, which finds a spurious association between AABC and the remaining time to onset.
+
+It needs only R and the `survival` package and runs in under a minute:
+
+```r
+source("tv_worked_example.R")
+```
+
+Supplementary Note 6 of the manuscript describes the data structure and gives the same models in SAS and Stata.
+
 ## Pipeline Overview
 
 `run_all.R` orchestrates 6 phases in dependency order:
