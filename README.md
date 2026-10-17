@@ -28,7 +28,7 @@ It needs only R and the `survival` package and runs in under a minute:
 source("tv_worked_example.R")
 ```
 
-Supplementary Note 6 of the manuscript describes the data structure and gives the same models in SAS and Stata.
+Supplementary Note 6 of the manuscript describes the data structure and how to fit both models in R.
 
 ## Pipeline Overview
 
@@ -96,6 +96,21 @@ The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_su
 | `create_manuscript_tables.R` | main\_results\_all\_biomarkers.csv, degeneracy\_all\_biomarkers.csv, table1\_demographics.csv | results/manuscript\_tables/\*.csv | Generates Tables 1-3 for the manuscript. All values read dynamically from upstream CSVs. |
 | `create_manuscript_figures.R` | Phase 2-3b outputs + simulation summaries | results/manuscript\_figures/*.pdf,*.png | Generates the main simulation figure (Figure 2: Study 1 panels a–c, Study 2 panels d–e) and the supplementary figures. Uses Okabe-Ito colorblind-safe palette. Person-years and EAOA values read dynamically. |
 | `figure_hr_aabc_panel.R` | results/fits\_p2\_p3\_all.rds (from `extract_full_coefficients.R`) | results/manuscript\_figures/figure\_hr\_aabc\_panel.pdf, .png | Generates Figure 3: hazard ratio of MCI onset as a function of AABC, five biomarker-cohort panels. |
+
+### Analyses Added in the Revision
+
+These scripts reproduce the analyses added in response to the reviewers (Supplementary Notes 5 and 7, Supplementary Table 10). They are not part of `run_all.R`; run them after it, with the same environment variables. Both source `conditional_survival_core.R`, which refits the time-varying models exactly as `extract_full_coefficients.R` does and stops unless the refit matches `results/full_coefficients_all_models.csv`.
+
+| Script | Input | Output | Description |
+| ------ | ----- | ------ | ----------- |
+| `R1_S6_beyond_curve.R` | data/\*.rda, results/full\_coefficients\_all\_models.csv | results/R1\_S6\_\<timestamp\>/S6\_beyond\_curve.csv | Refits TV-BC and TV-AABC without participants whose most recent biomarker value lies beyond the upper end of the SILA mean trajectory (Supplementary Note 5). |
+| `R1_S9_cause_specific.R` | data/\*.rda, results/full\_coefficients\_all\_models.csv, BIOCARD diagnosis file (`CP_BIOCARD_DIR`), ADNI\_2026\_data/DXSUM\_11Feb2026.csv | results/R1\_S9\_\<timestamp\>/S9A\_events\_by\_cause\_and\_status.csv, S9B\_cause\_specific\_hr.csv | Cause-specific analyses of AD-related MCI onset: MCI events by attributed cause and biomarker status at onset, and TV-BC and TV-AABC refitted with AD-related onset as the event (Supplementary Note 7, Supplementary Table 10). |
+
+```r
+Sys.setenv(CP_PROJECT_ROOT = "/path/to/repository", CP_BIOCARD_DIR = "/path/to/raw/BIOCARD/data")
+source("R1_S6_beyond_curve.R")
+source("R1_S9_cause_specific.R")
+```
 
 ### Validation Scripts
 
