@@ -27,6 +27,7 @@ if (project_root == "") stop("CP_PROJECT_ROOT is not set. Run via run_all.R, or 
 data_2026    <- file.path(project_root, "ADNI_2026_data")
 data_dir     <- file.path(project_root, "data")
 res_dir      <- file.path(project_root, "results")
+source(file.path(project_root, "shared_utils.R"))   # FindJump(), for the onset rule shared with BIOCARD
 
 
 ###############################################################################
@@ -144,7 +145,14 @@ dat_surv <- do.call(rbind, lapply(split(dat_dx, dat_dx$RID), function(x) {
       baseline.dx  <- x$dx[1]
       if (rev(x$dx)[1] %in% c(2, 3)) {
             d <- 1
-            onset.pos <- which(x$dx %in% c(2, 3))[1]
+            # MCI onset is dated from the start of the final uninterrupted run of MCI or dementia diagnoses, as in
+            # BIOCARD (GetSurv() in shared_utils.R, recycled); until the A&D revision (2026-10-22) it was the
+            # first visit with MCI or dementia, which differs only for participants who reverted to normal in between
+            temp <- as.numeric(x$dx %in% c(2, 3))
+            onset.pos <- nrow(x) - which(!FindJump(rev(temp)))[1] + 1
+            if (is.na(onset.pos)) {
+                  onset.pos <- 1
+            }
             onset.age <- x$age[onset.pos]
       } else {
             d <- 0

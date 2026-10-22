@@ -2,9 +2,12 @@
 ## R1_S9_cause_specific.R (A&D R1, Reviewer 2 Major 4a).
 ## Cause-specific analyses of AD-related MCI onset, as approved in
 ## CountdownParadox_Manuscript_A&D_R1/AD_R1_cause_specific_analysis_plan.md
-## Section 9 answered by Daisy, 2026-10-17: Q1-Q3 (a), as planned; Q4 (b): missing cause
-## counted as AD-related, plus a sensitivity fit counting it as other-cause.
-## Changed from R1_S9_cause_specific_10162026.R: only the Q4 sensitivity fit (and this header).
+## Section 9 answered by Daisy, 2026-10-17: Q1-Q3 (a), as planned. Q4 final (Daisy, 2026-10-20, after Corinne's
+## reply): events with no recorded etiology are a third cause, unknown etiology (label "missing" below): they stay
+## in the risk set and are censored at onset in the models of AD-related onset; no model is fitted for that cause,
+## and the earlier coding (counted as AD-related) is not reported.
+## Changed from R1_S9_cause_specific_10172026.R: only the AD-related event (AD only; was AD or missing) and the
+## removal of the Q4 sensitivity fit (and this header).
 ##
 ##  (A) MCI events cross-classified by attributed cause (AD / other / missing)
 ##      and biomarker status at onset (the Table 2 groups: positive at onset =
@@ -28,7 +31,7 @@
 ## Recycled: classify() and the refit pattern of R1_revision_analyses_10082026.R;
 ##   DXSUM handling of R1_S7/R1_S8; BIOCARD diagnosis reading of
 ##   BIOCARD_data_extraction.R.
-## Repository copy of CountdownParadox_Analysis/R1_S9_cause_specific_10172026.R; only the paths
+## Repository copy of CountdownParadox_Analysis/R1_S9_cause_specific_10202026.R; only the paths
 ## are changed. Needs the outputs of run_all.R (data/*.rda, results/full_coefficients_all_models.csv),
 ## CP_BIOCARD_DIR (raw BIOCARD files) and ADNI_2026_data/DXSUM_11Feb2026.csv.
 ## Yuxin Zhu (analysis drafted with Claude Code), 2026-10-16; Q4 sensitivity 2026-10-17
@@ -116,8 +119,8 @@ for (bm in names(fits)) {
                                                                               "not positive at last biomarker measurement", "other status"))))
             stopifnot(sum(tab$Freq) == sum(x$ev))                                   # G1: partition
             cntA[[paste(bm, df)]] <- data.frame(biomarker = bm, definition = df, tab)
-            ## cause-specific event: AD-related (missing cause counts as AD-related, plan Q4)
-            ad_ids <- ev$id[cause %in% c("AD", "missing")]
+            ## cause-specific event: AD-related onset only; other causes and unknown etiology ("missing") are censored at onset (plan Q4, 2026-10-20)
+            ad_ids <- ev$id[cause == "AD"]
             d$event_cs <- ifelse(d[[cl$event]] == 1 & d[[idc]] %in% ad_ids, 1, 0)
             stopifnot(all(d$event_cs <= d[[cl$event]]), sum(d$event_cs) == length(ad_ids))   # G1
             r <- run_all_models_capture(d, cl$eaoa, cl$entry, cl$exit, "event_cs", paste0(bm, "_CS_", df), f$cohort, cl$estpos)
@@ -125,17 +128,6 @@ for (bm in names(fits)) {
                   events_all = sum(d[[cl$event]]), events_missing_cause = sum(cause == "missing"),
                   term = c("TV-BC HR-beta", "TV-AABC HR-beta", "TV-AABC HR-gamma"),
                   rbind(hr_row(r$fit_p2, "Z_tv"), hr_row(r$fit_p3_bh, "Z_tv"), hr_row(r$fit_p3_bh, "AzZtv")))
-            ## Q4 sensitivity: missing cause counted as other-cause (censored at onset)
-            if (any(cause == "missing")) {
-                  ad_ids2 <- ev$id[cause == "AD"]
-                  d$event_cs2 <- ifelse(d[[cl$event]] == 1 & d[[idc]] %in% ad_ids2, 1, 0)
-                  stopifnot(all(d$event_cs2 <= d$event_cs), sum(d$event_cs2) == length(ad_ids2))   # G1
-                  r2 <- run_all_models_capture(d, cl$eaoa, cl$entry, cl$exit, "event_cs2", paste0(bm, "_CS_", df, "_missing_as_other"), f$cohort, cl$estpos)
-                  hrB[[paste(bm, df, "missing_as_other")]] <- data.frame(biomarker = bm, definition = paste0(df, "_missing_as_other"),
-                        events_AD_related = sum(d$event_cs2), events_all = sum(d[[cl$event]]), events_missing_cause = sum(cause == "missing"),
-                        term = c("TV-BC HR-beta", "TV-AABC HR-beta", "TV-AABC HR-gamma"),
-                        rbind(hr_row(r2$fit_p2, "Z_tv"), hr_row(r2$fit_p3_bh, "Z_tv"), hr_row(r2$fit_p3_bh, "AzZtv")))
-            }
       }
       hrB[[paste(bm, "all_cause")]] <- data.frame(biomarker = bm, definition = "all_cause_main", events_AD_related = NA,
             events_all = sum(d[[cl$event]]), events_missing_cause = NA,

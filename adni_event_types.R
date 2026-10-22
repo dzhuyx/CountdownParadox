@@ -28,21 +28,26 @@ data_dir  <- file.path(project_root, "data")
 data_2026 <- file.path(project_root, "ADNI_2026_data")
 res_dir   <- file.path(project_root, "results")
 if (!dir.exists(res_dir)) dir.create(res_dir, recursive = TRUE)
+source(file.path(project_root, "shared_utils.R"))   # FindJump(), for the onset rule shared with BIOCARD
 
 # ---- Full diagnosis trajectory per RID (to find each subject's first impaired Dx) ---- #
 dat_dx <- read.csv(file.path(data_2026, "DXSUM_11Feb2026.csv"), na.strings = -4)
 dat_dx$EXAMDATE <- as.Date(dat_dx$EXAMDATE, "%Y-%m-%d")
 dat_dx$dx <- dat_dx$DIAGNOSIS   # 1 = CN, 2 = MCI, 3 = dementia
 
-# Classify a subject's event path by the FIRST diagnosis in {2 (MCI), 3 (dementia)}
+# Classify a subject's event by the diagnosis at the onset visit, the start of the final uninterrupted run of
+# MCI or dementia diagnoses (the onset rule of ADNI_pet_sila.R and of BIOCARD since the A&D revision, 2026-10-22;
+# was the first diagnosis in {2, 3})
 classify_event_path <- function(rid) {
   x <- dat_dx[dat_dx$RID == rid, ]
   x <- x[complete.cases(x[, c("dx", "EXAMDATE")]), ]
   x <- x[order(x$EXAMDATE), ]
-  pos <- which(x$dx %in% c(2, 3))
-  if (length(pos) == 0) return(NA_character_)
-  if (x$dx[pos[1]] == 3) return("AD_direct")  # dementia without documented MCI
-  if (x$dx[pos[1]] == 2) return("MCI_first")  # standard CN -> MCI path
+  if (!(rev(x$dx)[1] %in% c(2, 3))) return(NA_character_)
+  temp <- as.numeric(x$dx %in% c(2, 3))
+  onset.pos <- nrow(x) - which(!FindJump(rev(temp)))[1] + 1
+  if (is.na(onset.pos)) onset.pos <- 1
+  if (x$dx[onset.pos] == 3) return("AD_direct")  # dementia at the onset visit
+  if (x$dx[onset.pos] == 2) return("MCI_first")  # MCI at the onset visit
   NA_character_
 }
 
