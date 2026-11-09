@@ -18,7 +18,7 @@
 ##   (2) build the same records with survival::tmerge() and check they agree;
 ##   (3) fit TV-BC and TV-AABC with survival::coxph();
 ##   (4) fit the standard countdown model for comparison.
-## See Supplementary Note 6 of the manuscript (data structure and software).
+## See Supplementary Note 2 of the manuscript (data structure and software).
 ##
 ## Runtime: under a minute. Requires: R (>= 4.1) and the survival package.
 ## Usage: source("tv_worked_example.R") or Rscript tv_worked_example.R

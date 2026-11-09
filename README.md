@@ -28,7 +28,7 @@ It needs only R and the `survival` package and runs in under a minute:
 source("tv_worked_example.R")
 ```
 
-Supplementary Note 6 of the manuscript describes the data structure and how to fit both models in R.
+Supplementary Note 2 of the manuscript describes the data structure and how to fit both models in R.
 
 ## Pipeline Overview
 
@@ -62,7 +62,7 @@ Supplementary Note 6 of the manuscript describes the data structure and how to f
 | Script | Input | Output | Description |
 | ------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BIOCARD_ADNI_main_analysis.R` | Phase 1 outputs + ADNI pre-computed CSVs | main\_results\_all\_biomarkers.csv, degeneracy\_all\_biomarkers.csv, sample\_sizes\_all\_biomarkers.csv | **Canonical analysis script**. Runs standard countdown (P1), TV-BC (P2), and TV-AABC (P3) models for all 5 biomarker-cohort combinations. BIOCARD results computed live; ADNI results carried forward from pre-computed CSVs. Includes runtime assertions for onset.age/censor.age. |
-| `extract_full_coefficients.R` | Phase 1 .rda files | full\_coefficients\_all\_models.csv, fits\_p2\_p3\_all.rds | Re-runs all 15 Cox PH models and extracts ALL coefficients (not just target effects) for Supp Table S8; also saves the fitted P2/P3 models (`fits_p2_p3_all.rds`) used by `figure_hr_aabc_panel.R`. |
+| `extract_full_coefficients.R` | Phase 1 .rda files | full\_coefficients\_all\_models.csv, fits\_p2\_p3\_all.rds | Re-runs all 15 Cox PH models and extracts ALL coefficients (not just target effects) for Supplementary Table 9; also saves the fitted P2/P3 models (`fits_p2_p3_all.rds`) used by `figure_hr_aabc_panel.R`. |
 
 ### Phase 1b: Variable Validation (Safeguard)
 
@@ -84,7 +84,7 @@ The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_su
 | Script | Input | Output | Description |
 | --------------------- | ------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `study1_simulation.R` | None (self-contained) | results/study1/all\_results.rds | Study 1: 15 null-effect configurations (S1-S9 + S1/S9 sample-size variants; Z independent of T). 1000 replicates. Standard + TVC. |
-| `study2_simulation.R` | None (self-contained) | results/study2/all\_results.rds | Study 2: 42+ scenarios with LMM trajectories. Null + alternative effects. |
+| `study2_simulation.R` | None (self-contained) | results/study2/all\_results.rds | Study 2: 59 scenarios with LMM trajectories. Null + alternative effects. |
 | `study1_summarize.R` | results/study1/all\_results.rds | results/study1/summary\_results.csv | Computes Type I error, mean HR, coverage from per-replicate results |
 | `study2_summarize.R` | results/study2/all\_results.rds | results/study2/summary\_results.csv | Computes power, direction accuracy, bias from per-replicate results |
 | `run_simulations.R` | N/A | results/study{1,2}/ | Runnable local runner: executes both simulation scripts (1000 replicates each) and the summarizers (\~11–12 h on a single core). The cluster workflow is documented below. |
@@ -99,12 +99,12 @@ The simulation scripts (`study1_simulation.R`, `study2_simulation.R`, `study1_su
 
 ### Analyses Added in the Revision
 
-These scripts reproduce the analyses added in response to the reviewers (Supplementary Notes 5 and 7, Supplementary Table 10). They are not part of `run_all.R`; run them after it, with the same environment variables. Both source `conditional_survival_core.R`, which refits the time-varying models exactly as `extract_full_coefficients.R` does and stops unless the refit matches `results/full_coefficients_all_models.csv`.
+These scripts reproduce the analyses added in response to the reviewers (Supplementary Notes 7 and 8, Supplementary Tables 10 and 11). They are not part of `run_all.R`; run them after it, with the same environment variables. Both source `conditional_survival_core.R`, which refits the time-varying models exactly as `extract_full_coefficients.R` does and stops unless the refit matches `results/full_coefficients_all_models.csv`.
 
 | Script | Input | Output | Description |
 | ------ | ----- | ------ | ----------- |
-| `R1_S6_beyond_curve.R` | data/\*.rda, results/full\_coefficients\_all\_models.csv | results/R1\_S6\_\<timestamp\>/S6\_beyond\_curve.csv | Refits TV-BC and TV-AABC without participants whose most recent biomarker value lies beyond the upper end of the SILA mean trajectory (Supplementary Note 5). |
-| `R1_S9_cause_specific.R` | data/\*.rda, results/full\_coefficients\_all\_models.csv, BIOCARD diagnosis file (`CP_BIOCARD_DIR`), ADNI\_2026\_data/DXSUM\_11Feb2026.csv | results/R1\_S9\_\<timestamp\>/S9A\_events\_by\_cause\_and\_status.csv, S9B\_cause\_specific\_hr.csv | Cause-specific analyses of AD-related MCI onset: MCI events by attributed cause and biomarker status at onset, and TV-BC and TV-AABC refitted with AD-related onset as the event (Supplementary Note 7, Supplementary Table 10). |
+| `R1_S6_beyond_curve.R` | data/\*.rda, results/full\_coefficients\_all\_models.csv | results/R1\_S6\_\<timestamp\>/S6\_beyond\_curve.csv | Refits TV-BC and TV-AABC without participants whose most recent biomarker value lies beyond the upper end of the SILA mean trajectory (Supplementary Note 7). |
+| `R1_S9_cause_specific.R` | data/\*.rda, results/full\_coefficients\_all\_models.csv, BIOCARD diagnosis file (`CP_BIOCARD_DIR`), ADNI\_2026\_data/DXSUM\_11Feb2026.csv | results/R1\_S9\_\<timestamp\>/S9A\_events\_by\_cause\_and\_status.csv, S9B\_cause\_specific\_hr.csv | Cause-specific analyses of AD-related MCI onset: MCI events by attributed cause and biomarker status at onset, and TV-BC and TV-AABC refitted with AD-related onset as the event (Supplementary Note 8, Supplementary Tables 10 and 11). |
 
 ```r
 Sys.setenv(CP_PROJECT_ROOT = "/path/to/repository", CP_BIOCARD_DIR = "/path/to/raw/BIOCARD/data")

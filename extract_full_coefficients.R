@@ -1,5 +1,5 @@
 ###############################################################################
-## Extract Full Covariate Coefficients for Supplementary Table 8
+## Extract Full Covariate Coefficients for Supplementary Table 9
 ##
 ## Purpose: Re-run all 15 Cox PH model fits (5 biomarkers x 3 models) and
 ##   extract ALL coefficients (not just target effects) for the full-model
